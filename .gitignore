@@ -1,2 +1,5 @@
 node_modules/
+views/
+public/
 npm-debug.log
+auth.js
