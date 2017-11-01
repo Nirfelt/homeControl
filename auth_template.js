@@ -12,6 +12,9 @@ auth.mongo_connection = auth.mongo_url + '/' + auth.db_name;
 //Session
 auth.session_secret = '<secret>';
 
+//Bcrypt
+auth.bcrypt_salt = '<number>';
+
 //App
 auth.app_port = '<port>';
 

@@ -1,5 +1,7 @@
 var express = require('express');
 var router = express.Router();
+var passport = require('passport');
+var LocalStrategy = require('passport-local').Strategy;
 
 var User = require('../models/user');
 
@@ -15,14 +17,16 @@ router.get('/login', function(req, res){
 
 //Register
 router.post('/register', function(req, res){
-	var name = req.body.name;
+	var firstName = req.body.firstName;
+	var lastName = req.body.lastName;
 	var email = req.body.email;
 	var username = req.body.username;
 	var password = req.body.password;
 	var password2 = req.body.password2;
 
 	//Validation
-	req.checkBody('name', 'Name is required').notEmpty();
+	req.checkBody('firstName', 'First name is required').notEmpty();
+	req.checkBody('lastName', 'Last name is required').notEmpty();
 	req.checkBody('email', 'Email is required').notEmpty();
 	req.checkBody('email', 'Email is not valid').isEmail();
 	req.checkBody('username', 'Username is required').notEmpty();
@@ -33,11 +37,12 @@ router.post('/register', function(req, res){
 
 	if(errors){
 		res.render('register',{
-			errors:errors
+			errors: errors
 		});
 	} else {
 		var newUser = new User({
-			name: name,
+			firstName: firstName,
+			lastName: lastName,
 			email: email,
 			username: username,
 			password: password
@@ -52,6 +57,51 @@ router.post('/register', function(req, res){
 
 		res.redirect('/users/login');
 	}
+});
+
+passport.use(new LocalStrategy({
+	usernameField: 'email',
+	passwordField: 'password'
+}, function(username, password, done) {
+	User.getUserByEmail(username, function(err, user){
+		if(err) throw err;
+		if(!user){
+			return done(null, false, {message: 'Unknown User'});
+		}
+
+		User.comparePassword(password, user.password, function(err, isMatch){
+			if(err) throw err;
+			if(isMatch){
+				return done(null, user);
+			} else {
+				return done(null, false, {message: 'Invalid password'});
+			}
+		});
+	});
+}));
+
+passport.serializeUser(function(user, done) {
+  done(null, user.id);
+});
+
+passport.deserializeUser(function(id, done) {
+  User.getUserById(id, function(err, user) {
+    done(err, user);
+  });
+});
+
+router.post('/login', 
+	passport.authenticate('local', {successRedirect:'/', failureRedirect:'/users/login', failureFlash: true}),
+	function(req, res) {
+	res.redirect('/');
+});
+
+router.get('/logout', function(req, res){
+	req.logout();
+
+	req.flash('success_msg', 'You are logged out');
+
+	res.redirect('/users/login');
 });
 
 module.exports = router;
