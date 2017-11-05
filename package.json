@@ -1,7 +1,7 @@
 {
-  "name": "wishlist",
+  "name": "homeControl",
   "version": "1.0.0",
-  "description": "Wishlist sharing app",
+  "description": "Home control app",
   "main": "app.js",
   "scripts": {
     "start": "nodemon app.js",
@@ -21,6 +21,7 @@
     "express-validator": "^4.3.0",
     "mongodb": "^2.2.33",
     "mongoose": "^4.12.4",
+    "net": "^1.0.2",
     "nodemon": "^1.12.1",
     "passport": "^0.4.0",
     "passport-http": "^0.3.0",

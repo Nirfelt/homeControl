@@ -10,7 +10,12 @@ var passport = require('passport');
 var LocalStrategy = require('passport-local').Strategy;
 var mongo = require('mongodb');
 var mongoose = require('mongoose');
+var net = require('net');
+
 var auth = require('./auth');
+
+var tellstick = net.createConnection("/tmp/TelldusEvents");
+var tellstickHandler = require('./tellstick/handler.js');
 
 mongoose.connect(auth.mongo_connection);
 var db = mongoose.connection;
@@ -74,6 +79,11 @@ app.use(function(req, res, next) {
 	res.locals.error = req.flash('error');
 	res.locals.user = req.user || null;
 	next();
+});
+
+//WebSockets
+tellstick.on("data", function(data) {
+    tellstickHandler.handleInput(data.toString('utf8'));
 });
 
 //Routes
